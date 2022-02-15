@@ -25,7 +25,7 @@ pub struct CommandResult
 {
     command: Command,
     value: String,
-    _options: HashMap<String, String>
+    options: HashMap<String, String>
 }
 
 impl CommandResult {
@@ -35,6 +35,10 @@ impl CommandResult {
 
     pub fn get_value(&self) -> String {
         self.value.to_string()
+    }
+
+    pub fn get_options(&self) -> &HashMap<String, String> {
+        &self.options
     }
 }
 
@@ -52,10 +56,30 @@ fn extract_command(value: String) -> Option<Command> {
 
 fn get_option_patterns() -> Vec<String> {
     vec![String::from("-p="),
-         String::from("--priority=")]
+         String::from("--priority="),
+         String::from("-t="),
+         String::from("--title=")]
 }
 
-fn extract_value(values: Vec<String>) -> String {
+fn get_option_name_from_pattern(value: &str) -> Option<String> {
+    let option_patterns = get_option_patterns();
+    let mut result: Option<String> = None;
+    for pattern in option_patterns {
+
+        if value.starts_with(&pattern) {
+            result = match pattern.as_str() {
+                "-p=" => Some(String::from("priority")),
+                "--priority=" => Some(String::from("priority")),
+                "-t=" => Some(String::from("title")),
+                "--title=" => Some(String::from("title")),
+                _ => None
+            }
+        }
+    }
+    result
+}
+
+fn extract_value(values: &Vec<String>) -> String {
     let mut retval = String::new();
     let option_patterns = get_option_patterns();
     for value in values {
@@ -76,19 +100,69 @@ fn extract_value(values: Vec<String>) -> String {
     retval.trim_start().to_string()
 }
 
+fn extract_options(values: &Vec<String>) -> HashMap<String, String> {
+    let mut retval = HashMap::new();
+    let mut option_found = false;
+    let mut current_option_name = String::new();
+    let mut current_option_value = String::new();
+    for value in values {
+        match get_option_name_from_pattern(&value) {
+            Some(option) => {
+                if option_found {
+                    //Add the last option found
+                    retval.insert(current_option_name, current_option_value);
+                }
+                option_found = true;
+                current_option_name = option;
+                current_option_value = extract_option_value(&value);
+                }
+            _ => {
+                if option_found {
+                    if current_option_value.len() > 0 {
+                        current_option_value.push(' ');
+                    }
+                    current_option_value.push_str(&value);
+                }
+            }
+        }           
+    }
+    if option_found {
+        //Add the last option
+        retval.insert(current_option_name, current_option_value);
+    }
+    retval
+}
+
+fn extract_option_value(option: &str) -> String {
+    let mut retval = String::new();
+    let option_parts: Vec<_> = option.split('=').collect();
+    if option_parts.len() > 1 {
+        for elem in option_parts[1..].to_vec() {
+            if retval.len() > 0 {
+                retval.push('=');
+            }
+            retval.push_str(elem);
+        }
+    }
+    retval.trim_end().to_string()
+}
+
 pub fn analyze_args(args: Vec<String>) -> Option<CommandResult> {
     if !args.is_empty() {
         let command_extracted = extract_command(args[0].to_string());
 
-        let mut value_extracted: String = String::from("");
+        let mut value_extracted: String = String::new();
+        let mut options_extracted: HashMap<String, String> = HashMap::new();
         if args.len() > 1 {
-            value_extracted = extract_value(args[1..].to_vec());
+            let values_and_options = args[1..].to_vec();
+            value_extracted = extract_value(&values_and_options);
+            options_extracted = extract_options(&values_and_options);
         }
         match command_extracted {
             Some(command_extracted) => Some(CommandResult { 
                                                           command: command_extracted, 
                                                           value: value_extracted,
-                                                          _options: HashMap::new()
+                                                          options: options_extracted
                                                           }),
             None => None
         }
@@ -102,6 +176,8 @@ pub fn analyze_args(args: Vec<String>) -> Option<CommandResult> {
 mod tests {
     use crate::args_analyzer::analyze_args;
     use crate::args_analyzer::Command;
+    use crate::args_analyzer::extract_option_value;
+    use crate::args_analyzer::get_option_name_from_pattern;
 
     #[test]
     fn command_equality_unkown_add_return_false() {
@@ -177,6 +253,107 @@ mod tests {
                                                String::from("-p=H")]).unwrap();
         assert!(Command::Add == command_result.get_command());
         assert_eq!("test two", command_result.get_value());
-        //assert_eq!(1, command_result.());
+        let actual_options = command_result.get_options();
+        assert_eq!(1, actual_options.len());
+        assert!(actual_options.contains_key("priority"));
+        assert_eq!("H", actual_options["priority"]);
+    }
+
+    #[test]
+    fn analyze_args_with_add_with_twowords_and_one_option_long_return_add_valid_command() {
+        let command_result = analyze_args(vec![String::from("add"), 
+                                               String::from("test"),
+                                               String::from("two"),
+                                               String::from("--priority=H")]).unwrap();
+        assert!(Command::Add == command_result.get_command());
+        assert_eq!("test two", command_result.get_value());
+        let actual_options = command_result.get_options();
+        assert_eq!(1, actual_options.len());
+        assert!(actual_options.contains_key("priority"));
+        assert_eq!("H", actual_options["priority"]);
+    }
+
+    #[test]
+    fn analyze_args_with_add_with_twowords_and_one_option_value_with_spaces_return_add_valid_command() {
+        let command_result = analyze_args(vec![String::from("add"), 
+                                               String::from("test"),
+                                               String::from("two"),
+                                               String::from("--priority=H"),
+                                               String::from("and"),
+                                               String::from("P")]).unwrap();
+        assert!(Command::Add == command_result.get_command());
+        assert_eq!("test two", command_result.get_value());
+        let actual_options = command_result.get_options();
+        assert_eq!(1, actual_options.len());
+        assert!(actual_options.contains_key("priority"));
+        assert_eq!("H and P", actual_options["priority"]);
+    }
+
+    #[test]
+    fn analyze_args_with_add_with_twowords_and_two_options_return_add_valid_command() {
+        let command_result = analyze_args(vec![String::from("add"), 
+                                               String::from("test"),
+                                               String::from("two"),
+                                               String::from("--priority=H"),
+                                               String::from("and"),
+                                               String::from("P"),
+                                               String::from("--title=Test"),
+                                               String::from("again")]).unwrap();
+        assert!(Command::Add == command_result.get_command());
+        assert_eq!("test two", command_result.get_value());
+        let actual_options = command_result.get_options();
+        assert_eq!(2, actual_options.len());
+        assert!(actual_options.contains_key("priority"));
+        assert_eq!("H and P", actual_options["priority"]);
+        assert!(actual_options.contains_key("title"));
+        assert_eq!("Test again", actual_options["title"]);
+    }
+
+    #[test]
+    fn get_option_name_from_pattern_with_p_return_priority() {
+        let actual = get_option_name_from_pattern("-p=H");
+        match actual {
+            Some(value) => assert_eq!("priority", value),
+            None => assert!(false)
+        }
+    }
+
+    #[test]
+    fn get_option_name_from_pattern_with_priority_return_priority() {
+        let actual = get_option_name_from_pattern("--priority=H");
+        match actual {
+            Some(value) => assert_eq!("priority", value),
+            None => assert!(false)
+        }
+    }
+
+    #[test]
+    fn get_option_name_from_pattern_with_blabla_return_none() {
+        assert!(get_option_name_from_pattern("--blabla=H").is_none());
+    }
+
+    #[test]
+    fn extract_option_value_with_p_equal_h_return_h() {
+        assert_eq!("H".to_string(), extract_option_value("-p=H"));
+    }
+
+    #[test]
+    fn extract_option_value_with_p_equal_hequalh_return_hequalh() {
+        assert_eq!("H=H".to_string(), extract_option_value("-p=H=H"));
+    }
+
+    #[test]
+    fn extract_option_value_with_p_equal_hequalhequal_return_hequalhequal() {
+        assert_eq!("H=H=".to_string(), extract_option_value("-p=H=H="));
+    }
+
+    #[test]
+    fn extract_option_value_with_p_equal_return_empty() {
+        assert_eq!("".to_string(), extract_option_value("-p="));
+    }
+
+    #[test]
+    fn extract_option_value_with_p_return_empty() {
+        assert_eq!("".to_string(), extract_option_value("-p"));
     }
 }
