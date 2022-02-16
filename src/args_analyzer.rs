@@ -314,7 +314,7 @@ mod tests {
         let actual = get_option_name_from_pattern("-p=H");
         match actual {
             Some(value) => assert_eq!("priority", value),
-            None => assert!(false)
+            None => panic!("Test failed")
         }
     }
 
@@ -323,7 +323,7 @@ mod tests {
         let actual = get_option_name_from_pattern("--priority=H");
         match actual {
             Some(value) => assert_eq!("priority", value),
-            None => assert!(false)
+            None => panic!("Test failed")
         }
     }
 
