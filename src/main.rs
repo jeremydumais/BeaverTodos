@@ -10,11 +10,11 @@ fn main() {
     match result_command {
         Some(result_command)=> 
             match result_command.get_command() {
-                args_analyzer::Command::Unknown => println!("Unknown command"),
-                args_analyzer::Command::Add => {
+                common_structs::Command::Unknown => println!("Unknown command"),
+                common_structs::Command::Add => {
                     let res = add_command::execute(&result_command);
                     match res {
-                        Ok(_) => println!("Success"),
+                        Ok(add_command) => println!("The todo {} has been added!", add_command.get_title()),
                         Err(e) => println!("Command failed {}", e)
 
                     }

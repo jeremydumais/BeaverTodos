@@ -1,46 +1,6 @@
+use crate::common_structs::Command;
+use crate::common_structs::CommandResult;
 use std::collections::HashMap;
-
-#[derive(Eq, Copy)]
-pub enum Command {
-    Unknown,
-    Add,
-    Edit,
-    Done,
-    Delete
-}
-
-impl PartialEq for Command {
-    fn eq(&self, other: &Command) -> bool {
-        *self as u8 == *other as u8
-    }
-}
-
-impl Clone for Command {
-    fn clone(&self) -> Self {
-        *self
-    }
-}
-
-pub struct CommandResult
-{
-    command: Command,
-    value: String,
-    options: HashMap<String, String>
-}
-
-impl CommandResult {
-    pub fn get_command(&self) -> Command {
-        self.command
-    }
-
-    pub fn get_value(&self) -> String {
-        self.value.to_string()
-    }
-
-    pub fn get_options(&self) -> &HashMap<String, String> {
-        &self.options
-    }
-}
 
 fn extract_command(value: String) -> Option<Command> {
     let trimmed_lowercase_value = value.trim().to_lowercase();
@@ -159,11 +119,9 @@ pub fn analyze_args(args: Vec<String>) -> Option<CommandResult> {
             options_extracted = extract_options(&values_and_options);
         }
         match command_extracted {
-            Some(command_extracted) => Some(CommandResult { 
-                                                          command: command_extracted, 
-                                                          value: value_extracted,
-                                                          options: options_extracted
-                                                          }),
+            Some(command_extracted) => Some(CommandResult::new(command_extracted, 
+                                                               value_extracted.as_str(),
+                                                               options_extracted)),
             None => None
         }
     }
