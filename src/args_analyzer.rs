@@ -10,6 +10,7 @@ fn extract_command(value: String) -> Option<Command> {
        "edit" => Some(Command::Edit),
        "done" => Some(Command::Done),
        "delete" => Some(Command::Delete),
+       "list" => Some(Command::List),
        _ => Some(Command::Unknown)
     }
 }

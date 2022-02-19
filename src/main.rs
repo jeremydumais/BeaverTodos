@@ -1,6 +1,8 @@
 mod args_analyzer;
 mod add_command;
 mod common_structs;
+mod data_service;
+mod list_command;
 
 use std::env;
 
@@ -15,12 +17,17 @@ fn main() {
                     let res = add_command::execute(&result_command);
                     match res {
                         Ok(add_command) => println!("The todo {} has been added!", add_command.get_title()),
-                        Err(e) => println!("Command failed {}", e)
-
+                        Err(e) => eprintln!("Command failed {}", e)
+                    }
+                },
+                common_structs::Command::List => {
+                    match list_command::execute(&result_command) {
+                        Ok(_) => (),
+                        Err(e) => eprintln!("Command failed {}", e)
                     }
                 }
                 _ => println!("valid command")
             } 
-        None => println!("No command provided")
+        None => eprintln!("No command provided")
     }
 }

@@ -1,5 +1,7 @@
 use crate::common_structs::CommandResult;
 use crate::common_structs::Priority;
+use crate::common_structs::Todo;
+use crate::data_service::add_todo;
 use std::error::Error;
 
 pub struct AddCommand {
@@ -16,14 +18,16 @@ impl AddCommand {
         self.title.as_str()
     }
 
-    pub fn get_priority(&self) -> &Priority {
-        &self.priority
+    pub fn get_priority(&self) -> Priority {
+        self.priority
     }
 }
 
 pub fn execute(command : &CommandResult) -> Result<AddCommand, Box<dyn Error>> {
     //Validate required fields
     let add_command = parse_command(command)?;
+    let todo = Todo::new(add_command.get_title(), add_command.get_priority());
+    add_todo(todo)?;
     Ok(add_command)
 }
 
@@ -44,6 +48,7 @@ fn parse_command(command : &CommandResult) -> Result<AddCommand, Box<dyn Error>>
         }
         None => Priority::Low
     };
+
     let add_command = AddCommand::new(command.get_value(), priority);
     Ok(add_command)
 }
@@ -97,9 +102,9 @@ mod tests {
         let _actual = match parse_command(&command_result) {
             Ok(add_command) => {
                 assert_eq!("test", add_command.get_title());
-                assert_eq!(Priority::Low, *add_command.get_priority());
+                assert_eq!(Priority::Low, add_command.get_priority());
             }
-            Err(e) => panic!("Test failed")
+            Err(_) => panic!("Test failed")
         };
     }
 
@@ -108,11 +113,11 @@ mod tests {
             "test", 
             HashMap::from([(String::from("priority"), String::from(letter))]));
         let _actual = match parse_command(&command_result) {
-        Ok(add_command) => {
-        assert_eq!("test", add_command.get_title());
-        assert_eq!(priority, *add_command.get_priority());
-        }
-        Err(e) => panic!("Test failed")
+            Ok(add_command) => {
+                assert_eq!("test", add_command.get_title());
+                assert_eq!(priority, add_command.get_priority());
+            }
+            Err(_) => panic!("Test failed")
         };
     }
 
