@@ -55,7 +55,7 @@ impl CommandResult {
     }
 }
 
-#[derive(Eq, Copy, Debug, Deserialize, Serialize)]
+#[derive(Eq, Copy, Ord, PartialOrd, Debug, Deserialize, Serialize)]
 pub enum Priority {
     High,
     Medium,
@@ -118,6 +118,10 @@ impl Todo {
     pub fn set_id(& mut self, id: u32) {
         self.id = id;
     }
+}
+
+pub trait ExecutableCommand {
+    fn execute(&self) -> Result<(), Box<dyn Error>>;
 }
 
 #[cfg(test)]
@@ -233,5 +237,25 @@ mod tests {
     fn todo_get_id_with_one_return_one() {
         let actual = Todo::new(1, "Test", Priority::Low).unwrap();
         assert_eq!(1, actual.get_id());
+    }
+
+    #[test]
+    fn todo_get_title_with_test_return_test() {
+        let actual = Todo::new(1, "Test", Priority::Low).unwrap();
+        assert_eq!("Test", actual.get_title());
+    }
+
+    #[test]
+    fn todo_get_priority_with_low_return_low() {
+        let actual = Todo::new(1, "Test", Priority::Low).unwrap();
+        assert_eq!(Priority::Low, actual.get_priority());
+    }
+
+    #[test]
+    fn todo_set_id_with_2_return_success() {
+        let mut actual = Todo::new(1, "Test", Priority::Low).unwrap();
+        assert_eq!(1, actual.get_id());
+        actual.set_id(2);
+        assert_eq!(2, actual.get_id());
     }
 }
