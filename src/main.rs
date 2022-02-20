@@ -28,6 +28,9 @@ fn main() {
                 }
                 _ => println!("valid command")
             } 
-        None => eprintln!("No command provided")
+        None => {
+            //TODO: Print the command usage
+            eprintln!("beaver: no command provided")
+        }
     }
 }
