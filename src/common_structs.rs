@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::error::Error;
 
 #[derive(Debug, Eq, Copy)]
 pub enum Command {
@@ -91,8 +92,15 @@ pub struct Todo {
 }
 
 impl Todo {
-    pub fn new(title: &str, priority: Priority) -> Todo {
-        Todo { id: 0, title: title.to_string(), priority: priority }
+    pub fn new(id: u32, title: &str, priority: Priority) -> Result<Todo, Box<dyn Error>> {
+        if title.trim().is_empty() {
+            return Err("Title is required".into())
+        }
+
+        Ok(Todo { id: id, 
+                  title: title.to_string(), 
+                  priority: priority 
+                })
     }
 
     pub fn get_id(&self) -> u32 {
@@ -117,6 +125,7 @@ mod tests {
     use crate::common_structs::Command;
     use crate::common_structs::CommandResult;
     use crate::common_structs::Priority;
+    use crate::common_structs::Todo;
     use std::collections::HashMap;
 
     #[test]
@@ -176,5 +185,53 @@ mod tests {
         assert_eq!("H", options.get("priority").unwrap());
     }
 
-    
+    #[test]
+    fn priority_equality_with_same_return_true() {
+        assert_eq!(Priority::High, Priority::High);
+    }
+
+    #[test]
+    fn priority_equality_with_different_return_true() {
+        assert_ne!(Priority::High, Priority::Medium);
+    }
+
+    #[test]
+    fn priority_clone_return_valid_copy() {
+        let mut actual = Priority::High;
+        let clone = actual.clone();
+        actual = Priority::Medium;
+        assert_eq!(actual, Priority::Medium);
+        assert_eq!(clone, Priority::High);
+    }
+
+    #[test]
+    fn priority_tostring_with_h_return_high() {
+        assert_eq!("High", Priority::High.to_string());
+    }
+
+    #[test]
+    fn priority_tostring_with_m_return_medium() {
+        assert_eq!("Medium", Priority::Medium.to_string());
+    }
+
+    #[test]
+    fn priority_tostring_with_l_return_low() {
+        assert_eq!("Low", Priority::Low.to_string());
+    }
+
+    #[test]
+    fn todo_new_with_empty_title_return_error() {
+        assert_eq!("Title is required", Todo::new(1, "", Priority::Low).unwrap_err().to_string());
+    }
+
+    #[test]
+    fn todo_new_with_whitespaces_title_return_error() {
+        assert_eq!("Title is required", Todo::new(1, "   ", Priority::Low).unwrap_err().to_string());
+    }
+
+    #[test]
+    fn todo_get_id_with_one_return_one() {
+        let actual = Todo::new(1, "Test", Priority::Low).unwrap();
+        assert_eq!(1, actual.get_id());
+    }
 }

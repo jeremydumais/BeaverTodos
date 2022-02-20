@@ -26,7 +26,7 @@ impl AddCommand {
 pub fn execute(command : &CommandResult) -> Result<AddCommand, Box<dyn Error>> {
     //Validate required fields
     let add_command = parse_command(command)?;
-    let todo = Todo::new(add_command.get_title(), add_command.get_priority());
+    let todo = Todo::new(0, add_command.get_title(), add_command.get_priority())?;
     add_todo(todo)?;
     Ok(add_command)
 }
