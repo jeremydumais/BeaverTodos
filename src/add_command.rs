@@ -1,8 +1,7 @@
-use crate::common_structs::CommandResult;
-use crate::common_structs::ExecutableCommand;
-use crate::common_structs::Priority;
-use crate::common_structs::Todo;
+use crate::common_structs::{ CommandResult, ExecutableCommand, Priority, Todo};
 use crate::data_service::add_todo;
+use chrono::Utc;
+use termion::color;
 use std::error::Error;
 
 #[derive(Debug)]
@@ -13,7 +12,6 @@ pub struct AddCommand {
 
 impl AddCommand {
     pub fn new(title: &str, priority: Priority) -> Result<AddCommand, Box<dyn Error>> {
-        //Check command required values
         if title.trim().is_empty() {
             return Err("Value cannot be empty".into());
         }
@@ -21,7 +19,6 @@ impl AddCommand {
     }
 
     pub fn new_from_command_result(command_result: &CommandResult) -> Result<AddCommand, Box<dyn Error>> {
-        //Check command required values
         if command_result.get_value().trim().is_empty() {
             return Err("Value cannot be empty".into());
         }
@@ -45,19 +42,17 @@ impl AddCommand {
 
 impl ExecutableCommand for AddCommand {
     fn execute(&self) -> Result<(), Box<dyn Error>> {
-        let todo = Todo::new(0, self.title.as_str(), self.priority)?;
+        let todo = Todo::new(0, self.title.as_str(), self.priority, Utc::now())?;
         let id_assigned = add_todo(todo)?;
-        println!("The todo {} has been added with id {}!", self.title, id_assigned);
+        println!("{}The todo {} has been added with id {}!", color::Fg(color::Green), self.title, id_assigned);
         Ok(())
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::add_command::AddCommand;
-    use crate::add_command::Priority;
-    use crate::common_structs::Command;
-    use crate::common_structs::CommandResult;
+    use crate::add_command::{ AddCommand, Priority };
+    use crate::common_structs::{ Command, CommandResult };
     use std::collections::HashMap;
 
     #[test]

@@ -8,9 +8,10 @@ fn extract_command(value: String) -> Option<Command> {
        "" => None,
        "add" => Some(Command::Add),
        "edit" => Some(Command::Edit),
-       "done" => Some(Command::Done),
        "delete" => Some(Command::Delete),
+       "done" => Some(Command::Done),
        "list" => Some(Command::List),
+       "purge" => Some(Command::Purge),
        _ => Some(Command::Unknown)
     }
 }
@@ -19,7 +20,11 @@ fn get_option_patterns() -> Vec<String> {
     vec![String::from("-p="),
          String::from("--priority="),
          String::from("-t="),
-         String::from("--title=")]
+         String::from("--title="),
+         String::from("-s="),
+         String::from("--sort="),
+         String::from("-a"),
+         String::from("--all")]
 }
 
 fn get_option_name_from_pattern(value: &str) -> Option<String> {
@@ -27,12 +32,17 @@ fn get_option_name_from_pattern(value: &str) -> Option<String> {
     let mut result: Option<String> = None;
     for pattern in option_patterns {
 
-        if value.starts_with(&pattern) {
+        if (!pattern.ends_with('=') && value == pattern) || 
+           (pattern.ends_with('=') && value.starts_with(&pattern)) {
             result = match pattern.as_str() {
                 "-p=" => Some(String::from("priority")),
                 "--priority=" => Some(String::from("priority")),
                 "-t=" => Some(String::from("title")),
                 "--title=" => Some(String::from("title")),
+                "-s=" => Some(String::from("sort")),
+                "--sort=" => Some(String::from("sort")),
+                "-a" => Some(String::from("all")),
+                "--all" => Some(String::from("all")),
                 _ => None
             }
         }
@@ -289,6 +299,26 @@ mod tests {
     #[test]
     fn get_option_name_from_pattern_with_blabla_return_none() {
         assert!(get_option_name_from_pattern("--blabla=H").is_none());
+    }
+
+    #[test]
+    fn get_option_name_from_pattern_with_long_all_return_all() {
+        assert_eq!("all", get_option_name_from_pattern("--all").unwrap());
+    }
+
+    #[test]
+    fn get_option_name_from_pattern_with_long_allocator_return_none() {
+        assert!(get_option_name_from_pattern("--allocator").is_none());
+    }
+
+    #[test]
+    fn get_option_name_from_pattern_with_short_all_return_all() {
+        assert_eq!("all", get_option_name_from_pattern("-a").unwrap());
+    }
+
+    #[test]
+    fn get_option_name_from_pattern_with_short_allocator_return_none() {
+        assert!(get_option_name_from_pattern("-allocator").is_none());
     }
 
     #[test]

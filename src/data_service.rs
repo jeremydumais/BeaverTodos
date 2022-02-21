@@ -52,9 +52,9 @@ pub fn find_next_available_todo_id(todos: &Vec<Todo>) -> u32 {
 
 #[cfg(test)]
 mod tests {
-    use crate::common_structs::Priority;
-    use crate::common_structs::Todo;
+    use crate::common_structs::{ Priority, Todo };
     use crate::data_service::find_next_available_todo_id;
+    use chrono::Utc;
 
     #[test]
     fn find_next_available_todo_id_with_empty_return_one() {
@@ -65,7 +65,7 @@ mod tests {
     #[test]
     fn find_next_available_todo_id_with_1_return_two() {
         let todos: Vec<Todo> = vec![
-            Todo::new(1, "a", Priority::Low).unwrap()
+            Todo::new(1, "a", Priority::Low, Utc::now()).unwrap()
         ];
         assert_eq!(2, find_next_available_todo_id(&todos));
     }
@@ -73,8 +73,8 @@ mod tests {
     #[test]
     fn find_next_available_todo_id_with_1_2_return_three() {
         let todos: Vec<Todo> = vec![
-            Todo::new(1, "a", Priority::Low).unwrap(),
-            Todo::new(2, "b", Priority::Low).unwrap()
+            Todo::new(1, "a", Priority::Low, Utc::now()).unwrap(),
+            Todo::new(2, "b", Priority::Low, Utc::now()).unwrap()
         ];
         assert_eq!(3, find_next_available_todo_id(&todos));
     }
@@ -82,8 +82,8 @@ mod tests {
     #[test]
     fn find_next_available_todo_id_with_2_3_return_one() {
         let todos: Vec<Todo> = vec![
-            Todo::new(2, "a", Priority::Low).unwrap(),
-            Todo::new(3, "b", Priority::Low).unwrap()
+            Todo::new(2, "a", Priority::Low, Utc::now()).unwrap(),
+            Todo::new(3, "b", Priority::Low, Utc::now()).unwrap()
         ];
         assert_eq!(1, find_next_available_todo_id(&todos));
     }
@@ -91,8 +91,8 @@ mod tests {
     #[test]
     fn find_next_available_todo_id_with_1_3_return_two() {
         let todos: Vec<Todo> = vec![
-            Todo::new(1, "a", Priority::Low).unwrap(),
-            Todo::new(3, "b", Priority::Low).unwrap()
+            Todo::new(1, "a", Priority::Low, Utc::now()).unwrap(),
+            Todo::new(3, "b", Priority::Low, Utc::now()).unwrap()
         ];
         assert_eq!(2, find_next_available_todo_id(&todos));
     }
