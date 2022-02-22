@@ -17,10 +17,6 @@ impl DoneCommand {
         let id = value.parse::<u32>()?;
         Ok(DoneCommand { id: id })
     }
-
-    pub fn get_id(&self) -> u32 {
-        self.id
-    }
 }
 
 impl ExecutableCommand for DoneCommand {
@@ -75,7 +71,7 @@ mod tests {
         let command = DoneCommand::new_from_command_result(&CommandResult::new(Command::Done, 
             "1", 
             HashMap::new()));
-        assert_eq!(1, command.unwrap().get_id());
+        assert_eq!(1, command.unwrap().id);
     }
 
     #[test]
@@ -83,7 +79,7 @@ mod tests {
         let command = DoneCommand::new_from_command_result(&CommandResult::new(Command::Done, 
             "100", 
             HashMap::new()));
-        assert_eq!(100, command.unwrap().get_id());
+        assert_eq!(100, command.unwrap().id);
     }
 
     #[test]

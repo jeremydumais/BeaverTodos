@@ -1,5 +1,7 @@
 use crate::common_structs::Todo;
 use std::error::Error;
+use std::fs;
+use std::path::Path;
 use home::home_dir;
 
 pub fn get_todos_file() -> String {
@@ -29,6 +31,11 @@ pub fn read_all_todos() -> Result<Vec<Todo>, Box<dyn Error>> {
 
 pub fn write_todos(todos: &Vec<Todo>) -> Result<(), Box<dyn Error>> {
     let todos_str = serde_json::to_string_pretty(todos)?;
+    //Check if the .beaver folder exist in the home directory
+    let beaver_folder = format!("{}/.beaver", home_dir().unwrap().display());
+    if !Path::new(&beaver_folder).exists() {
+        fs::create_dir(&beaver_folder)?;
+    }
     std::fs::write(get_todos_file(), todos_str)?;
     Ok(())
 }

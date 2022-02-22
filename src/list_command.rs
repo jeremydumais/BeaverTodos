@@ -38,7 +38,7 @@ impl ListCommand {
                 "creationtimedesc" => SortOrder::CreationTimeDESC,
                 "CreationTime" => SortOrder::CreationTimeASC,
                 "creationtime" => SortOrder::CreationTimeASC,
-                _ => return Err("Invalid sort value. Must be PriorityDESC, Priority, CreationTimeDESC or CreationTime".into())
+                _ => return Err("Invalid sort value. Must be prioritydesc, priority, creationtimedesc or creationtime".into())
             }
             None => SortOrder::PriorityDESC
         };
