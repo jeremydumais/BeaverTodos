@@ -5,23 +5,20 @@ mod data_service;
 mod done_command;
 mod list_command;
 
-use crate::common_structs::Command;
-use crate::common_structs::ExecutableCommand;
+use crate::common_structs::{Command, ExecutableCommand};
 use termion::{color, style};
 use std::env;
 use std::error::Error;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    if args.len() >= 1 {
-        if args[1] == "-v" || args[1] == "--version" {
-            print_version();
-            return;
-        }
-        else if args[1] == "-h" || args[1] == "--help" {
-            print_usage();
-            return;
-        }
+    if args.len() == 1 || (args[1] == "-h" || args[1] == "--help") {
+        print_usage();
+        return;
+    }
+    if args.len() >= 1 && args[1] == "-v" || args[1] == "--version" {
+        print_version();
+        return;
     }
     let result_command = args_analyzer::analyze_args(args[1..].to_vec());
     match result_command {
