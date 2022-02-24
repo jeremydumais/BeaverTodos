@@ -3,6 +3,7 @@ mod add_command;
 mod common_structs;
 mod data_service;
 mod done_command;
+mod edit_command;
 mod list_command;
 
 use crate::common_structs::{Command, ExecutableCommand};
@@ -39,6 +40,12 @@ fn main() {
                 },
                 Command::Done => {
                     match done_command::DoneCommand::new_from_command_result(&result_command) {
+                        Ok(command) => execute_command(command),
+                        Err(e) => print_command_error(e)
+                    }
+                },
+                Command::Edit => {
+                    match edit_command::EditCommand::new_from_command_result(&result_command) {
                         Ok(command) => execute_command(command),
                         Err(e) => print_command_error(e)
                     }

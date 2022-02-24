@@ -86,6 +86,20 @@ impl ToString for Priority {
     }
 }
 
+impl Priority {
+    pub fn from_string(value: &str) -> Option<Priority> {
+        match value {
+            "h" => Some(Priority::High),
+            "H" => Some(Priority::High),
+            "m" => Some(Priority::Medium),
+            "M" => Some(Priority::Medium),
+            "l" => Some(Priority::Low),
+            "L" => Some(Priority::Low),
+            _ => None
+        }
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Todo {
     id: u32,
@@ -281,6 +295,46 @@ mod tests {
     #[test]
     fn priority_tostring_with_l_return_low() {
         assert_eq!("Low", Priority::Low.to_string());
+    }
+
+    #[test]
+    fn priority_from_char_with_h_return_high() {
+        assert_eq!(Priority::High, Priority::from_string("h").unwrap());
+    }
+
+    #[test]
+    fn priority_from_char_with_h_caps_return_high() {
+        assert_eq!(Priority::High, Priority::from_string("H").unwrap());
+    }
+
+    #[test]
+    fn priority_from_char_with_m_return_medium() {
+        assert_eq!(Priority::Medium, Priority::from_string("m").unwrap());
+    }
+
+    #[test]
+    fn priority_from_char_with_m_caps_return_medium() {
+        assert_eq!(Priority::Medium, Priority::from_string("M").unwrap());
+    }
+
+    #[test]
+    fn priority_from_char_with_l_return_low() {
+        assert_eq!(Priority::Low, Priority::from_string("l").unwrap());
+    }
+
+    #[test]
+    fn priority_from_char_with_l_caps_return_low() {
+        assert_eq!(Priority::Low, Priority::from_string("L").unwrap());
+    }
+
+    #[test]
+    fn priority_from_char_with_empty_return_none() {
+        assert!(Priority::from_string("").is_none());
+    }
+
+    #[test]
+    fn priority_from_char_with_z_return_none() {
+        assert!(Priority::from_string("z").is_none());
     }
 
     #[test]
