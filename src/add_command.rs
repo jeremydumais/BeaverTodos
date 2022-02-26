@@ -1,5 +1,6 @@
-use crate::common_structs::{ CommandResult, ExecutableCommand, Priority, Todo};
+use crate::common_structs::{ CommandResult, ExecutableCommand, Priority};
 use crate::data_service::add_todo;
+use crate::todo::Todo;
 use chrono::Utc;
 use termion::color;
 use std::error::Error;

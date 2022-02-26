@@ -1,4 +1,5 @@
 use crate::common_structs::{CommandResult, ExecutableCommand, Priority};
+use crate::data_service::{read_all_todos, write_todos};
 use termion::color;
 use std::error::Error;
 
@@ -37,6 +38,21 @@ impl EditCommand {
 
 impl ExecutableCommand for EditCommand {
     fn execute(&self) -> Result<(), Box<dyn Error>> {
+        let mut todos = read_all_todos()?;
+        //Find the todo to update
+        let mut iter = todos.iter_mut();
+        match iter.find(|x| x.get_id() == self.id) {
+            Some(todo) => {
+                if self.title.is_some() {
+                    todo.set_title(self.title.as_ref().unwrap().as_str())?;
+                }
+                if self.priority.is_some() {
+                    todo.set_priority(self.priority.unwrap())
+                }
+            },
+            None => return Err(format!("Unable to find the todo with id {}", self.id).into())
+        }
+        write_todos(&todos)?;
         println!("{}The todo {} has been updated!", color::Fg(color::Green), self.id);
         Ok(())
     }

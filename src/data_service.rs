@@ -1,4 +1,4 @@
-use crate::common_structs::Todo;
+use crate::todo::Todo;
 use std::error::Error;
 use std::fs;
 use std::path::Path;
@@ -59,7 +59,8 @@ pub fn find_next_available_todo_id(todos: &Vec<Todo>) -> u32 {
 
 #[cfg(test)]
 mod tests {
-    use crate::common_structs::{ Priority, Todo };
+    use crate::common_structs::Priority;
+    use crate::todo::Todo;
     use crate::data_service::find_next_available_todo_id;
     use chrono::Utc;
 

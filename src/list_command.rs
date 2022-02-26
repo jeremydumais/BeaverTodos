@@ -1,8 +1,6 @@
 use crate::data_service;
-use crate::common_structs::CommandResult;
-use crate::common_structs::ExecutableCommand;
-use crate::common_structs::Priority;
-use crate::common_structs::Todo;
+use crate::common_structs::{CommandResult, ExecutableCommand, Priority};
+use crate::todo::Todo;
 use termion::style;
 use std::error::Error;
 use std::io;
@@ -83,7 +81,7 @@ impl ListCommand {
             print!("{when_completed:widthw$}", when_completed="Completed date", widthw=ListCommand::COMPLETED_DATE_WIDTH)
 
         }
-        print!("\n{}", style::NoUnderline);
+        print!("\n{}", style::Reset);
         io::stdout().flush().unwrap();
     }
 
@@ -117,7 +115,7 @@ impl ListCommand {
                        when_completed=completed_date, 
                        widthw=ListCommand::COMPLETED_DATE_WIDTH);
             }
-            print!("\n{}", style::NoBold);
+            print!("\n{}", style::Reset);
             io::stdout().flush().unwrap();
     }
 }
@@ -133,7 +131,8 @@ impl ExecutableCommand for ListCommand {
             SortOrder::CreationTimeASC => todos.sort_by(|a, b| a.get_when_created_in_localtime().cmp(&b.get_when_created_in_localtime())),
             SortOrder::CreationTimeDESC => todos.sort_by(|a, b| b.get_when_created_in_localtime().cmp(&a.get_when_created_in_localtime())),
             SortOrder::PriorityASC => todos.sort_by(|a, b| b.get_priority().cmp(&a.get_priority())),
-            SortOrder::PriorityDESC => todos.sort_by(|a, b| a.get_priority().cmp(&b.get_priority())),            
+            //default -> Sort be Priority DESC, then by creation time
+            SortOrder::PriorityDESC => todos.sort_unstable_by_key(|item| (item.get_priority(), item.get_when_created_in_localtime()))          
         }
         //Sort todos by priority by default (Highest to lowest)
         if todos.len() > 0 {
