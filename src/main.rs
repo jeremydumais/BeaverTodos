@@ -8,6 +8,7 @@ mod fetch_command;
 mod list_command;
 mod next_command;
 mod purge_command;
+mod remove_command;
 mod todo;
 
 use crate::common_structs::{Command, ExecutableCommand};
@@ -60,6 +61,12 @@ fn main() {
                         Err(e) => print_command_error(e)
                     }
                 },
+                Command::Remove => {
+                    match remove_command::RemoveCommand::new_from_command_result(&result_command) {
+                        Ok(command) => execute_command(command),
+                        Err(e) => print_command_error(e)
+                    }
+                },
                 Command::Purge => {
                     let command = purge_command::PurgeCommand {};
                     execute_command(command);
@@ -107,6 +114,7 @@ fn print_usage()
     println!("    done                           Complete a todo");
     println!("    next                           Display the next todo to work on");
     println!("    fetch                          Display the details of a specific todo");
+    println!("    remove                         Delete a todo");
     println!("    purge                          Delete all completed todos");
     println!("");
     println!("USAGE BY COMMAND:");
@@ -128,6 +136,7 @@ fn print_usage()
     println!("    {}done{} id                        The id of the todo to complete", style::Underline, style::NoUnderline);
     println!("    {}next{}                           <No argument required>", style::Underline, style::NoUnderline);
     println!("    {}fetch{} id                       The id of the todo to display", style::Underline, style::NoUnderline);
+    println!("    {}remove{} id                      The id of the todo to delete", style::Underline, style::NoUnderline);
     println!("    {}purge{}                          <No argument required>", style::Underline, style::NoUnderline);
     println!("\n");
 }

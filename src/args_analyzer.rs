@@ -14,6 +14,7 @@ fn extract_command(value: String) -> Option<Command> {
        "list" => Some(Command::List),
        "next" => Some(Command::Next),
        "purge" => Some(Command::Purge),
+       "remove" => Some(Command::Remove),
        _ => Some(Command::Unknown)
     }
 }

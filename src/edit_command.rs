@@ -41,7 +41,7 @@ impl ExecutableCommand for EditCommand {
         let mut todos = read_all_todos()?;
         //Find the todo to update
         let mut iter = todos.iter_mut();
-        match iter.find(|x| x.get_id() == self.id) {
+        match iter.find(|x| x.get_id() == self.id && !x.get_completed()) {
             Some(todo) => {
                 if self.title.is_some() {
                     todo.set_title(self.title.as_ref().unwrap().as_str())?;

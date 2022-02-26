@@ -12,7 +12,8 @@ pub enum Command {
     Fetch,
     List,
     Purge,
-    Next
+    Next,
+    Remove
 }
 
 impl PartialEq for Command {

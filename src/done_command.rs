@@ -36,7 +36,7 @@ impl ExecutableCommand for DoneCommand {
             None => return Err(format!("Unable to find the todo with id {}", self.id).into())
         }
         write_todos(&todos)?;
-        println!("{}The todo {} has been completed !", color::Fg(color::Green), todo_title);
+        println!("{}The todo {} has been completed!", color::Fg(color::Green), todo_title);
         Ok(())
     }
 }

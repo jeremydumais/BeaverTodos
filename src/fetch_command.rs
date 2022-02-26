@@ -22,7 +22,7 @@ impl ExecutableCommand for FetchCommand {
     fn execute(&self) -> Result<(), Box<dyn Error>> {
         let todos = read_all_todos()?;
         let mut iter = todos.iter();
-        match iter.find(|x| x.get_id() == self.id) {
+        match iter.find(|x| x.get_id() == self.id && !x.get_completed()) {
             Some(todo) => {
                 println!("Title: {}{}{}", style::Bold, todo.get_title(), style::Reset);
                 println!("ID: {}", todo.get_id());
