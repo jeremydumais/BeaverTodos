@@ -1,10 +1,12 @@
 #!/bin/sh
 
 main() {
-    local _installer_version
-    _installer_version="1.0.0"
-    local _version
-    _version="0.2"
+    #Ensure we are in the same directory as the install script 
+    BASEDIR=$(dirname $0)
+    cd $BASEDIR
+
+    local _installer_version="1.0.0"
+    local _version="0.2"
     need_cmd mkdir
     need_cmd mktemp
     need_cmd cp
@@ -15,11 +17,21 @@ main() {
     #_dir = "$(ensure mktemp -d)"
     #ignore rmdir "$_dir"
 
+
+    local _need_to_build=false
+    local _need_to_download=false
+
     for arg in "$@"; do
         case "$arg" in
             -h|--help)
                 usage
                 exit 0
+                ;;
+            -b|--build)
+                _need_to_build=true
+                ;;
+            -d|--download)
+                _need_to_download=true
                 ;;
             -v|--version)
                 echo $_installer_version
@@ -29,6 +41,20 @@ main() {
                 ;;
         esac
     done
+
+    if $_need_to_build && $_need_to_download; then
+        err "You cannot set both build and download."
+        exit 1
+    fi
+
+    local _executable_path
+    if $_need_to_build; then
+        build
+        _executable_path=$RETVAL
+        echo $_executable_path
+    fi
+
+    install $_executable_path
 }
 
 usage() {
@@ -53,6 +79,52 @@ OPTIONS:
     -c, --component <components>...                Component name to also install
     -t, --target <targets>...                      Target name to also install
 EOF
+}
+
+build() {
+    need_cmd cargo
+    need_cmd which
+    echo "Building the release of Beaver Todos"
+    ensure cargo build --release
+    local _executable_path=$(which target/release/beaver)
+    RETVAL=$_executable_path
+}
+
+install() {
+    local _local_bin_folder="$HOME/.local/bin"
+    local _path_variable_updated=false
+    #Check if the $HOME/.local/bin folder exist
+    if [ ! -d $_local_bin_folder ] 
+    then
+        echo "Folder $_local_bin_folder not exist. Creating the folder..."
+        ensure mkdir -p $_local_bin_folder
+        echo "Done"
+    fi
+    echo "Copy the beaver executable file in $_local_bin_folder"
+    cp $1 $_local_bin_folder
+    ensure chmod ugo+x $_local_bin_folder/beaver
+    #Check if $HOME/.local/bin is in the path
+    if [[ ":$PATH:" == *":$_local_bin_folder:"* ]]; then
+        echo "Your path is correctly set"
+    else
+        echo "Adding $_local_bin_folder to the PATH variable..."
+        ensure source echo "export PATH=$PATH:/home/jed/.local/bin"
+        echo done
+        _path_variable_updated=true
+    fi
+    echo ""
+    echo "Installation completed!"
+    echo ""
+    if $_path_variable_updated 
+    then
+        echo "To get started you may need to restart your current shell.
+This would reload its PATH environment variable to include
+Beaver's bin directory ($_local_bin_folder)."
+        echo ""
+    else
+        echo "You can now use the beaver command."
+        echo ""
+    fi
 }
 
 need_cmd() {
