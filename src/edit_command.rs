@@ -53,7 +53,7 @@ impl ExecutableCommand for EditCommand {
             None => return Err(format!("Unable to find the todo with id {}", self.id).into())
         }
         write_todos(&todos)?;
-        println!("{}The todo {} has been updated!", color::Fg(color::Green), self.id);
+        println!("{}The todo {} has been updated!{}", color::Fg(color::Green), self.id, color::Fg(color::Reset));
         Ok(())
     }
 }

@@ -40,7 +40,7 @@ impl ExecutableCommand for AddCommand {
     fn execute(&self) -> Result<(), Box<dyn Error>> {
         let todo = Todo::new(0, self.title.as_str(), self.priority, Utc::now())?;
         let id_assigned = add_todo(todo)?;
-        println!("{}The todo {} has been added with id {}!", color::Fg(color::Green), self.title, id_assigned);
+        println!("{}The todo {} has been added with id {}{}!", color::Fg(color::Green), self.title, id_assigned, color::Fg(color::Reset));
         Ok(())
     }
 }

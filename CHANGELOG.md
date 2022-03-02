@@ -18,3 +18,9 @@ All notable changes to this project will be documented in this file.
 - Get the next todo to work on
 - Fetch the details of a todo
 - Add the usage when no command is supplied
+
+## [0.2.1]
+
+### Bug fix
+- Fix issue #3. Text color is not reset for next line
+  https://github.com/jeremydumais/BeaverTodos/issues/3

@@ -6,7 +6,7 @@ main() {
     cd $BASEDIR
 
     local _installer_version="1.0.0"
-    local _version="0.2.0"
+    local _version="0.2.1"
     need_cmd mkdir
     need_cmd cp
     need_cmd chmod
