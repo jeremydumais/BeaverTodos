@@ -1,5 +1,6 @@
-use crate::common_structs::{ CommandResult, ExecutableCommand, Priority, Todo};
+use crate::common_structs::{ CommandResult, ExecutableCommand, Priority};
 use crate::data_service::add_todo;
+use crate::todo::Todo;
 use chrono::Utc;
 use termion::color;
 use std::error::Error;
@@ -23,13 +24,8 @@ impl AddCommand {
             return Err("Value cannot be empty".into());
         }
         let priority = match command_result.get_options().get("priority") {
-            Some(p) => match p.as_str() {
-                "H" => Priority::High,
-                "h" => Priority::High,
-                "M" => Priority::Medium,
-                "m" => Priority::Medium,
-                "L" => Priority::Low,
-                "l" => Priority::Low,
+            Some(val) => match Priority::from_string(val) {
+                Some(p) => p,
                 _ => return Err("Invalid priority value. Must be H, M or L".into())
             }
             None => Priority::Low

@@ -1,4 +1,4 @@
-use crate::common_structs::Todo;
+use crate::todo::Todo;
 use std::error::Error;
 use std::fs;
 use std::path::Path;
@@ -47,7 +47,7 @@ pub fn find_next_available_todo_id(todos: &Vec<Todo>) -> u32 {
         is_id_available = true;
         // Check if the id suggested is already taken
         for todo in todos {
-            if todo.get_id() == available_id {
+            if todo.get_id() == available_id && !todo.get_completed() {
                 is_id_available = false;
                 available_id += 1;
                 break; 
@@ -59,7 +59,8 @@ pub fn find_next_available_todo_id(todos: &Vec<Todo>) -> u32 {
 
 #[cfg(test)]
 mod tests {
-    use crate::common_structs::{ Priority, Todo };
+    use crate::common_structs::Priority;
+    use crate::todo::Todo;
     use crate::data_service::find_next_available_todo_id;
     use chrono::Utc;
 
@@ -87,6 +88,16 @@ mod tests {
     }
 
     #[test]
+    fn find_next_available_todo_id_with_1_2_3_return_three() {
+        let todos: Vec<Todo> = vec![
+            Todo::new(1, "a", Priority::Low, Utc::now()).unwrap(),
+            Todo::new(2, "b", Priority::Low, Utc::now()).unwrap(),
+            Todo::new(3, "c", Priority::Low, Utc::now()).unwrap()
+        ];
+        assert_eq!(4, find_next_available_todo_id(&todos));
+    }
+
+    #[test]
     fn find_next_available_todo_id_with_2_3_return_one() {
         let todos: Vec<Todo> = vec![
             Todo::new(2, "a", Priority::Low, Utc::now()).unwrap(),
@@ -101,6 +112,26 @@ mod tests {
             Todo::new(1, "a", Priority::Low, Utc::now()).unwrap(),
             Todo::new(3, "b", Priority::Low, Utc::now()).unwrap()
         ];
+        assert_eq!(2, find_next_available_todo_id(&todos));
+    }
+
+    #[test]
+    fn find_next_available_todo_id_with_1_completed_return_one() {
+        let mut todos: Vec<Todo> = vec![
+            Todo::new(1, "a", Priority::Low, Utc::now()).unwrap(),
+        ];
+        todos[0].set_completed(true, None);
+        assert_eq!(1, find_next_available_todo_id(&todos));
+    }
+
+    #[test]
+    fn find_next_available_todo_id_with_1_3_and_2_completed_return_two() {
+        let mut todos: Vec<Todo> = vec![
+            Todo::new(1, "a", Priority::Low, Utc::now()).unwrap(),
+            Todo::new(2, "b", Priority::Low, Utc::now()).unwrap(),
+            Todo::new(3, "c", Priority::Low, Utc::now()).unwrap()
+        ];
+        todos[1].set_completed(true, None);
         assert_eq!(2, find_next_available_todo_id(&todos));
     }
 }

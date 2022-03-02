@@ -1,4 +1,4 @@
-use crate::common_structs::{CommandResult, ExecutableCommand, Todo};
+use crate::common_structs::{CommandResult, ExecutableCommand};
 use crate::data_service::{read_all_todos, write_todos};
 use termion::color;
 use std::error::Error;
@@ -22,25 +22,22 @@ impl DoneCommand {
 impl ExecutableCommand for DoneCommand {
     fn execute(&self) -> Result<(), Box<dyn Error>> {
         let mut todos = read_all_todos()?;
-        let mut completed_todo: Option<Todo> = None;
+        let todo_title;
         //Find the todo to complete
-        for todo in &mut todos {
-            if todo.get_id() == self.id {
+        let mut iter = todos.iter_mut();
+        match iter.find(|x| x.get_id() == self.id) {
+            Some(todo) => {
                 if todo.get_completed() {
                     return Err(format!("The todo with id {} is already completed", self.id).into());
                 }
                 todo.set_completed(true, None);
-                completed_todo = Some(todo.clone());
-            }
-        }
-        match completed_todo {
-            Some(t) => {
-                write_todos(&todos)?;
-                println!("{}The todo {} has been completed !", color::Fg(color::Green), t.get_title());
-                Ok(())
+                todo_title = String::from(todo.get_title());
             },
-            None => Err(format!("Unable to find the todo with id {}", self.id).into())
+            None => return Err(format!("Unable to find the todo with id {}", self.id).into())
         }
+        write_todos(&todos)?;
+        println!("{}The todo {} has been completed!", color::Fg(color::Green), todo_title);
+        Ok(())
     }
 }
 
