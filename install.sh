@@ -53,7 +53,7 @@ main() {
     fi
 
     if $_need_to_download; then
-        download $_dir
+        download $_dir $_version
         _executable_path=$RETVAL
     fi
 
@@ -93,8 +93,10 @@ build() {
 download() {
     echo "Downloading the latest binaries..."
     need_cmd curl
+    local _url=https://github.com/jeremydumais/BeaverTodos/releases/download/v$2/beaver
+    echo $_url
     local _filename="$1/beaver"
-    curl -sSL https://github.com/jeremydumais/BeaverTodos/releases/download/v$version/beaver --output $_filename
+    curl -sSL $_url --output $_filename
     RETVAL=$_filename
 }
 
