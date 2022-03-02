@@ -43,8 +43,7 @@ main() {
         exit 1
     fi
     if ! $_need_to_build && ! $_need_to_download; then
-        usage
-        exit 0
+        _need_to_download=true
     fi
 
     local _executable_path
@@ -73,6 +72,7 @@ USAGE:
 FLAGS:
     -b, --build             Build from source and install
     -d, --download          Download binaries and install
+                            *This is the Default behavior if no flag is specified
     -r, --root              Install in /usr/local/bin instead of
                             ~/.local/bin
     -h, --help              Prints help information
