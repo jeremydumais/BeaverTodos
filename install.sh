@@ -6,21 +6,17 @@ main() {
     cd $BASEDIR
 
     local _installer_version="1.0.0"
-    local _version="0.2"
+    local _version="0.2.0"
     need_cmd mkdir
-    need_cmd mktemp
     need_cmd cp
-    need_cmd curl
-    
-    #Check if beaver is already installed
-    local _dir 
-    #_dir = "$(ensure mktemp -d)"
-    #ignore rmdir "$_dir"
-
-
+    need_cmd chmod
+    need_cmd mktemp
+    need_cmd rm
+    local _dir="$(ensure mktemp -d)"
+        
     local _need_to_build=false
     local _need_to_download=false
-
+    local _local_bin_folder="$HOME/.local/bin"
     for arg in "$@"; do
         case "$arg" in
             -h|--help)
@@ -46,15 +42,24 @@ main() {
         err "You cannot set both build and download."
         exit 1
     fi
+    if ! $_need_to_build && ! $_need_to_download; then
+        usage
+        exit 0
+    fi
 
     local _executable_path
     if $_need_to_build; then
         build
         _executable_path=$RETVAL
-        echo $_executable_path
     fi
 
-    install $_executable_path
+    if $_need_to_download; then
+        download $_dir
+        _executable_path=$RETVAL
+    fi
+
+    install $_executable_path $_local_bin_folder
+    ignore rm -r "$_dir"
 }
 
 usage() {
@@ -63,21 +68,16 @@ beaver-installer $_installer_version
 The installer for BeaverTodos
 
 USAGE:
-    install.sh [FLAGS] [OPTIONS]
+    install.sh [FLAGS]
 
 FLAGS:
-    -b, --build             Enable verbose output
-    -d, --download          Disable progress output
+    -b, --build             Build from source and install
+    -d, --download          Download binaries and install
+    -r, --root              Install in /usr/local/bin instead of
+                            ~/.local/bin
     -h, --help              Prints help information
     -V, --version           Prints version information
 
-OPTIONS:
-        --default-host <default-host>              Choose a default host triple
-        --default-toolchain <default-toolchain>    Choose a default toolchain to install
-        --default-toolchain none                   Do not install any toolchains
-        --profile [minimal|default|complete]       Choose a profile
-    -c, --component <components>...                Component name to also install
-    -t, --target <targets>...                      Target name to also install
 EOF
 }
 
@@ -90,39 +90,37 @@ build() {
     RETVAL=$_executable_path
 }
 
+download() {
+    echo "Downloading the latest binaries..."
+    need_cmd curl
+    local _filename="$1/beaver"
+    curl -sSL https://github.com/jeremydumais/BeaverTodos/releases/download/v$version/beaver --output $_filename
+    RETVAL=$_filename
+}
+
 install() {
-    local _local_bin_folder="$HOME/.local/bin"
-    local _path_variable_updated=false
-    #Check if the $HOME/.local/bin folder exist
-    if [ ! -d $_local_bin_folder ] 
+    echo "Starting installation..."
+    #Check if the _local_bin_folder folder exist
+    if [ ! -d $2 ] 
     then
-        echo "Folder $_local_bin_folder not exist. Creating the folder..."
-        ensure mkdir -p $_local_bin_folder
+        echo "Folder $2 not exist. Creating the folder..."
+        ensure mkdir -p $2
         echo "Done"
     fi
-    echo "Copy the beaver executable file in $_local_bin_folder"
-    cp $1 $_local_bin_folder
-    ensure chmod ugo+x $_local_bin_folder/beaver
-    #Check if $HOME/.local/bin is in the path
-    if [[ ":$PATH:" == *":$_local_bin_folder:"* ]]; then
-        echo "Your path is correctly set"
-    else
-        echo "Adding $_local_bin_folder to the PATH variable..."
-        ensure source echo "export PATH=$PATH:/home/jed/.local/bin"
-        echo done
-        _path_variable_updated=true
-    fi
+    echo "Copy the beaver executable file in $2"
+    cp $1 $2/
+    ensure chmod ugo+x $2/beaver
     echo ""
     echo "Installation completed!"
     echo ""
-    if $_path_variable_updated 
-    then
-        echo "To get started you may need to restart your current shell.
-This would reload its PATH environment variable to include
-Beaver's bin directory ($_local_bin_folder)."
+
+    #Check if $HOME/.local/bin is in the path
+    if echo "$PATH" | grep $2 > /dev/null 2>&1; then
+        echo "You can now use the beaver command."
         echo ""
     else
-        echo "You can now use the beaver command."
+        echo "To get started you need $2 in your 'PATH'
+environment variable. This has not been done automatically."
         echo ""
     fi
 }
