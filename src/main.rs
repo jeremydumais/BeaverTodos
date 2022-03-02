@@ -30,7 +30,7 @@ fn main() {
     match result_command {
         Some(result_command)=> 
             match result_command.get_command() {
-                Command::Unknown => eprintln!("{}beaver: Unknown command", color::Fg(color::Red)),
+                Command::Unknown => eprintln!("{}beaver: Unknown command{}", color::Fg(color::Red), color::Fg(color::Reset)),
                 Command::Add => {
                     match add_command::AddCommand::new_from_command_result(&result_command) {
                         Ok(command) => execute_command(command),
@@ -75,10 +75,10 @@ fn main() {
                     let command = next_command::NextCommand {};
                     execute_command(command);
                 }
-                _ => eprintln!("{}Not implemented command", color::Fg(color::Red))
+                _ => eprintln!("{}Not implemented command{}", color::Fg(color::Red), color::Fg(color::Reset))
             } 
         None => {
-            eprintln!("{}beaver: no command provided", color::Fg(color::Red))
+            eprintln!("{}beaver: no command provided{}", color::Fg(color::Red), color::Fg(color::Reset))
         }
     }
 }
@@ -91,7 +91,7 @@ fn execute_command(command: impl ExecutableCommand) {
 }
 
 fn print_command_error(error: Box<dyn Error>) {
-    eprintln!("{}beaver: {}", color::Fg(color::Red), error);
+    eprintln!("{}beaver: {}{}", color::Fg(color::Red), error, color::Fg(color::Reset));
 }
 
 fn print_version() {

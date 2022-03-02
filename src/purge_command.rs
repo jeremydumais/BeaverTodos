@@ -21,7 +21,7 @@ impl ExecutableCommand for PurgeCommand {
                                    .ask();
         if answer.unwrap_or(Answer::NO) == Answer::YES {
             write_todos(&todos)?;
-            println!("{}The purge has removed {} completed todo(s)!", color::Fg(color::Green), todos_count_to_remove);
+            println!("{}The purge has removed {} completed todo(s)!{}", color::Fg(color::Green), todos_count_to_remove, color::Fg(color::Reset));
         }
         Ok(())
     }

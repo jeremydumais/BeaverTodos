@@ -41,7 +41,7 @@ impl ExecutableCommand for RemoveCommand {
         if answer.unwrap_or(Answer::NO) == Answer::YES {
             todos.remove(todo_index);
             write_todos(&todos)?;
-            println!("{}The todo with id {} has been removed!", color::Fg(color::Green), self.id);
+            println!("{}The todo with id {} has been removed!{}", color::Fg(color::Green), self.id, color::Fg(color::Reset));
         }
         Ok(())
     }
