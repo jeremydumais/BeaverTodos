@@ -24,3 +24,9 @@ All notable changes to this project will be documented in this file.
 ### Bug fix
 - Fix issue #3. Text color is not reset for next line
   https://github.com/jeremydumais/BeaverTodos/issues/3
+
+## [0.2.2]
+
+### Bug fix
+- Fix issue #5. Unable to close a todo if a completed todo has the same id
+https://github.com/jeremydumais/BeaverTodos/issues/5

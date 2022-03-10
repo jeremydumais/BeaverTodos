@@ -96,7 +96,7 @@ fn print_command_error(error: Box<dyn Error>) {
 
 fn print_version() {
     println!("Beaver todos");
-    println!("Version 0.2.1");
+    println!("Version 0.2.2");
     println!("Source : https://github.com/jeremydumais/BeaverTodos");
 }
 
