@@ -25,11 +25,8 @@ impl ExecutableCommand for DoneCommand {
         let todo_title;
         //Find the todo to complete
         let mut iter = todos.iter_mut();
-        match iter.find(|x| x.get_id() == self.id) {
+        match iter.find(|x| x.get_id() == self.id && !x.get_completed()) {
             Some(todo) => {
-                if todo.get_completed() {
-                    return Err(format!("The todo with id {} is already completed", self.id).into());
-                }
                 todo.set_completed(true, None);
                 todo_title = String::from(todo.get_title());
             },

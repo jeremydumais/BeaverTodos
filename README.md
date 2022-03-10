@@ -23,7 +23,7 @@ cd BeaverTodos
 sh install.sh -b
 ```
 
-## Features in version 0.2.1
+## Features in version 0.2.2
 
 - Remove a todo
 - Edit a todo
